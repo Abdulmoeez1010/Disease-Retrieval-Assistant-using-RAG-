@@ -53,4 +53,6 @@ def handle_query(query: str) -> str:
         {"input_documents": docs, "question": query},
         return_only_outputs=True
     )
-    return result["output_text"]
+    return intent, result["output_text"]
+
+
