@@ -1,4 +1,4 @@
-# 🧠 Symptom-Disease Retrieval Assistant (DeenAI for Medicine)
+# 🧠 Symptom-Disease Retrieval Assistant
 
 An intelligent medical assistant built using **LangChain**, **FAISS**, **Streamlit**, and **Machine Learning**, which helps users:
 - Understand **symptoms and treatments** of diseases
