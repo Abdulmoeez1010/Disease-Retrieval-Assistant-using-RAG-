@@ -6,7 +6,8 @@ import os
 def get_llm():
     return ChatGoogleGenerativeAI(
         model="gemini-2.0-flash",
-        temperature=0.4,
+        temperature=0.5,
+        max_output_tokens = 1000,
         google_api_key=os.getenv("GEMINI_API_KEY")
     )
 

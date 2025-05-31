@@ -15,6 +15,7 @@ def load_documents():
         Document(page_content=row["clean_text"], metadata={"label": row["label"]})
         for _, row in df.iterrows()
     ]
+    # Split documents into chunks for better retrieval
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     return splitter.split_documents(documents)
 
