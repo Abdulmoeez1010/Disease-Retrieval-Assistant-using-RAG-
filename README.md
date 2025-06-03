@@ -1,41 +1,44 @@
-🧠 Symptom-Disease Retrieval Assistant
-An intelligent medical assistant powered by Machine Learning, LangChain, Gemini Pro, FAISS, and Streamlit. This system allows users to:
+# 🧠 Symptom-Disease Retrieval Assistant
 
-🔎 Understand symptoms and treatments of various diseases
+An intelligent medical assistant built using **LangChain**, **FAISS**, **Streamlit**, and **Machine Learning**, which helps users:
+- Understand **symptoms and treatments** of diseases
+- Ask **general health queries**
+- Automatically detect **user intent** (symptom, treatment, general query)
+- Retrieve and generate responses using LLMs + RAG (Retrieval-Augmented Generation)
 
-💬 Ask general health-related questions
+---
 
-🧠 Automatically classify queries into symptom, treatment, or general query
+## 🚀 Features
 
-🧬 Retrieve and generate responses using RAG (Retrieval-Augmented Generation)
+- ✅ Symptom & treatment search using **FAISS vector DB**
+- ✅ Intent classification with **Logistic Regression**
+- ✅ **Query-based document retrieval** using LangChain
+- ✅ Gemini-based LLM responses
+- ✅ Streamlit UI for smooth interaction
 
-🚀 Features
-✅ Symptom & treatment search using FAISS vector DB
-✅ Intent classification with Logistic Regression
-✅ Gemini-based LLM responses via LangChain
-✅ Context-aware RAG pipeline for relevant answer generation
-✅ Streamlit-powered interactive UI
+---
 
-📁 Project Structure
+## 📁 Project Structure
+
+```bash
 symptom_disease_project/
 │
 ├── app.py                      # 🔷 Streamlit UI entry point
-├── query_handler.py           # 🔍 Handles query classification & response
-├── query_classifier.py        # 🧠 Trains intent classifier
-├── vector_store.py            # 📚 Loads FAISS vector database
-├── initializer_vector_db.py   # 🧱 Builds FAISS vector DB from dataset
-├── llm_chain.py               # 🤖 LLM & LangChain QA chain setup
+├── query_handler.py           # 🔍 Query processing & intent handling
+├── query_classifier.py        # 🧠 Classifier training
+├── vector_store.py            # 📚 FAISS DB loading
+├── llm_chain.py               # 🤖 LangChain prompt and QA chain
+├── initializer_vector_db.py   # 🧱 Build vector DB from CSV
 │
 ├── Data/
-│   ├── classifier_dataset.csv        # Data for intent classification
-│   ├── cleaned_symptoms.csv          # Main dataset for vectorization
-│   └── faiss_symptom_index/          # FAISS vector store
+│   ├── classifier_dataset.csv         # Classifier training data
+│   ├── cleaned_symptoms.csv           # Main corpus
+│   ├── faiss_symptom_index/           # FAISS vector store
 │
-├── .env                      # 🔐 Contains Gemini API key (excluded from Git)
-├── requirements.txt          # 📦 Project dependencies
+├── venv/                     # 🔒 Virtual environment (excluded)
+├── .env                      # 🔐 API keys (excluded)
 ├── .gitignore
 └── README.md
-
 
 🛠️ How to Run the Project
 Follow these steps to set up and run the application locally:
@@ -93,3 +96,4 @@ Python – Core development language
 
 📚 License
 This project is built as part of an academic course and is open for educational use.
+
