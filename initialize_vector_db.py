@@ -1,19 +1,19 @@
-# initialize_vector_db.py
+from langchain_huggingface import HuggingFaceEmbeddings
 from vector_store import create_vector_store
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
 def main():
-    print("📦 Creating FAISS vector DB from symptoms CSV...")
-    embedding = GoogleGenerativeAIEmbeddings(
-        model="models/embedding-001",
-        google_api_key=os.getenv("GEMINI_API_KEY")
+    print("📦 Creating FAISS vector DB...")
+
+    embedding = HuggingFaceEmbeddings(
+        model_name="all-MiniLM-L6-v2"
     )
+
     create_vector_store(embedding)
-    print("✅ Vector store created at 'data/faiss_symptom_index/'")
+    print("✅ Vector store created successfully.")
 
 if __name__ == "__main__":
     main()
