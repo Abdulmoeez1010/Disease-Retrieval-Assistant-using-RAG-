@@ -3,7 +3,7 @@
 **A Knowledge Representation & Reasoning Enhanced Conversational AI for Preliminary Symptom Assessment**
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](https://fastapi.tiangolo.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
@@ -27,9 +27,9 @@
 This project is an AI-powered medical chatbot that combines **Knowledge Representation & Reasoning (KRR)** with **Retrieval-Augmented Generation (RAG)** to provide intelligent, explainable symptom assessment.
 
 Unlike traditional chatbots that simply retrieve information, our system:
-- 🧠 **Reasons** about diseases using a formal medical ontology
-- 🔍 **Retrieves** relevant medical documents semantically
-- 💡 **Explains** its reasoning process transparently
+- 🧠 **Reasons** about diseases using a formal medical ontology, before the LLM ever sees the query
+- 🔍 **Retrieves** relevant medical documents semantically, re-ranked using the reasoning output
+- 💡 **Explains** its reasoning process transparently, live, in the UI
 - 💬 **Remembers** conversation context for natural follow-ups
 
 **⚠️ Disclaimer:** This is an educational project. It does NOT replace professional medical advice, diagnosis, or treatment.
@@ -39,67 +39,70 @@ Unlike traditional chatbots that simply retrieve information, our system:
 ## ✨ Features
 
 ### Core Capabilities
-- **Medical Ontology**: Formal knowledge base with 10+ diseases, 20+ symptoms, and inference rules
-- **Reasoning Engine**: Rule-based system that applies medical logic to infer conditions
-- **RAG Integration**: Semantic search over 1,000+ medical text chunks using FAISS
-- **Explainable AI**: Shows extracted symptoms, disease candidates, and confidence scores
-- **Context Awareness**: Maintains conversation history for natural follow-up questions
-- **Urgency Detection**: Alerts users when immediate medical attention is needed
+- **Medical Ontology**: Formal knowledge base covering 4 diseases (Dengue Fever, Malaria, Common Cold, Migraine), their symptoms, severity, treatments, complications, and 3 inference rules
+- **Reasoning Engine**: Rule-based system that applies medical logic to infer conditions and assign confidence scores
+- **RAG Integration**: Semantic search over medical text chunks using FAISS + `all-MiniLM-L6-v2` embeddings, re-ranked by KRR-inferred diseases
+- **Explainable AI**: A persistent reasoning panel shows extracted symptoms, disease candidates, and confidence scores as the conversation unfolds
+- **Context Awareness**: Maintains conversation history for natural follow-up questions ("what causes it?", "what's the treatment?")
+- **Urgency Detection**: Flags when a symptom or top disease candidate requires immediate medical attention
 
 ### User Interface
-- Clean, intuitive chat interface built with Streamlit
-- Expandable reasoning visualization with confidence bars
-- Intent classification badges
-- Conversation history persistence
-- One-click chat reset
+- Custom web frontend (HTML/CSS/JS) served independently of the backend
+- **Live reasoning ledger** — symptoms, disease confidence bars, and urgency alerts update in real time, always visible (not tucked away in a collapsible panel)
+- Intent tag per response (symptom_query / treatment_query / general_query)
+- Session-based conversation history with one-click reset
 
 ---
 
 ## 🏗️ Architecture
 ```
 ┌─────────────────────────────────────────┐
-│         User Query Input                │
-└──────────────┬──────────────────────────┘
+│         User Query Input                 │
+└──────────────┬────────────────────────────┘
                │
                ▼
 ┌──────────────────────────────────────────┐
-│  1. Intent Classification (ML)           │
-└──────────────┬───────────────────────────┘
+│  1. Intent Classification (ML)            │
+└──────────────┬─────────────────────────────┘
                │
                ▼
 ┌──────────────────────────────────────────┐
-│  2. Symptom Extraction (NLP + Ontology)  │
-└──────────────┬───────────────────────────┘
+│  2. Symptom Extraction (NLP + Ontology)   │
+└──────────────┬─────────────────────────────┘
                │
                ▼
 ┌──────────────────────────────────────────┐
-│  3. Disease Reasoning (KRR)              │
-│     • Symptom Matching                   │
-│     • Rule Application                   │
-│     • Confidence Scoring                 │
-└──────────────┬───────────────────────────┘
+│  3. Disease Reasoning (KRR)               │
+│     • Symptom Matching                    │
+│     • Rule Application                    │
+│     • Confidence Scoring                  │
+└──────────────┬─────────────────────────────┘
                │
                ▼
 ┌──────────────────────────────────────────┐
-│  4. Document Retrieval (RAG + FAISS)     │
-└──────────────┬───────────────────────────┘
+│  4. Document Retrieval (RAG + FAISS)      │
+│     Re-ranked using KRR disease candidates│
+└──────────────┬─────────────────────────────┘
                │
                ▼
 ┌──────────────────────────────────────────┐
-│  5. Knowledge Synthesis                  │
-│     (Reasoning + Documents + History)    │
-└──────────────┬───────────────────────────┘
+│  5. Knowledge Synthesis                   │
+│     (Reasoning + Documents + History)     │
+└──────────────┬─────────────────────────────┘
                │
                ▼
 ┌──────────────────────────────────────────┐
-│  6. LLM Response (Google Gemini)         │
-└──────────────┬───────────────────────────┘
+│  6. LLM Response (Google Gemini 2.5 Flash)│
+└──────────────┬─────────────────────────────┘
                │
                ▼
 ┌──────────────────────────────────────────┐
-│  7. UI Display with Explainability       │
+│  7. FastAPI Response → Frontend Display   │
+│     with live reasoning visualization     │
 └──────────────────────────────────────────┘
 ```
+
+The backend (`main.py`, built with **FastAPI**) exposes the entire pipeline above as a REST API, decoupled from the UI. The frontend (`index.html`) is a standalone client that consumes that API — meaning any interface (web, mobile, another service) could plug into the same reasoning pipeline.
 
 ---
 
@@ -112,8 +115,8 @@ Unlike traditional chatbots that simply retrieve information, our system:
 
 ### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/yourusername/medical-chatbot-krr.git
-cd medical-chatbot-krr
+git clone https://github.com/Abdulmoeez1010/Disease-Retrieval-Assistant-using-RAG-.git
+cd Disease-Retrieval-Assistant-using-RAG-
 ```
 
 ### Step 2: Create Virtual Environment (Recommended)
@@ -134,20 +137,14 @@ pip install -r requirements.txt
 
 ### Step 4: Set Up Environment Variables
 Create a `.env` file in the project root:
-```bash
-# Copy the example file
-cp .env.example .env
-```
-
-Edit `.env` and add your Google Gemini API key:
 ```
 GEMINI_API_KEY=your_actual_api_key_here
 ```
 
 ### Step 5: Verify Data Files
-Ensure these files exist:
-- `data/cleaned_symptoms.csv`
-- `data/faiss_symptom_index/` (folder with FAISS index)
+Ensure these exist:
+- `Data/cleaned_symptoms.csv`
+- `Data/faiss_symptom_index/` (folder with FAISS index)
 - `query_classifier.joblib`
 
 ---
@@ -155,69 +152,67 @@ Ensure these files exist:
 ## 💻 Usage
 
 ### Running the Application
-```bash
-streamlit run app.py
-```
 
-The app will open in your browser at `http://localhost:8501`
+**1. Start the backend (FastAPI):**
+```bash
+uvicorn main:app --reload --port 8000
+```
+This exposes the reasoning + RAG + LLM pipeline at `http://localhost:8000`.
+
+**2. Open the frontend:**
+Simply open `index.html` in your browser (double-click, or serve it with any static server). It talks to the backend at `http://localhost:8000`.
 
 ### Example Interaction
 ```
 You: I have fever and red spots on my skin
 
-Bot: I understand you're experiencing fever and red spots, which must be 
-     concerning. Based on my analysis, these symptoms are commonly associated 
+Bot: I understand you're experiencing fever and red spots, which must be
+     concerning. Based on my analysis, these symptoms are commonly associated
      with Dengue Fever...
-     
-     [View Reasoning Process ▼]
-     
+
+[Live in the reasoning ledger, no click required]
      🧬 Extracted Symptoms: High Fever, Skin Rash
-     
      🔬 Disease Analysis:
-     1. 🟢 Dengue Fever - 80%
-        ✅ Matched: High Fever, Skin Rash, Severe Headache
-        ⚠️ Requires immediate medical attention
-     
-     2. 🟡 Measles - 60%
-        ✅ Matched: Fever, Rash
+       1. Dengue Fever — 80%   (matched: High Fever, Skin Rash, Severe Headache)
+       ⚠️ Requires immediate medical attention
 
 You: What causes it?
 
-Bot: Regarding the Dengue Fever we discussed, it's caused by the dengue 
-     virus, which is transmitted through the bite of infected Aedes mosquitoes...
+Bot: Regarding the Dengue Fever we discussed, it's caused by the dengue
+     virus, transmitted through the bite of infected Aedes mosquitoes...
 ```
 
-### Commands
-- Type your symptoms or questions naturally
-- Click **"Clear Chat"** to start a new conversation
-- Expand **"View Reasoning Process"** to see how the system reached its conclusions
+### Controls
+- Type symptoms or questions naturally in the chat input
+- Watch the **reasoning ledger** on the left update live — no need to expand anything
+- Click **"Clear conversation"** to reset the session
 
 ---
 
 ## 📁 Project Structure
 ```
-medical-chatbot-krr/
+symptom_disease_project/
 │
-├── app.py                      # Streamlit UI (main entry point)
-├── query_handler.py            # Main orchestrator with KRR pipeline
+├── main.py                     # FastAPI backend (REST API entry point)
+├── index.html                  # Custom frontend (chat + live reasoning ledger)
+├── query_handler.py            # Main orchestrator: KRR + RAG + LLM pipeline
 ├── llm_chain.py                # LLM prompt engineering & chain
 ├── vector_store.py             # FAISS vector database operations
 ├── medical_ontology.py         # Medical knowledge representation
 ├── reasoning_engine.py         # Reasoning logic & inference
+├── query_classifier.py         # Intent classifier training script
+├── query_classifier.joblib     # Trained intent classifier
+├── debug_test.py               # Standalone script to test API key / LLM connectivity
 ├── requirements.txt            # Python dependencies
-├── .env.example                # Environment variables template
+├── .env                        # Environment variables (not committed)
 ├── README.md                   # This file
 │
-├── data/
-│   ├── cleaned_symptoms.csv    # Medical text dataset
-│   ├── faiss_symptom_index/    # FAISS vector index
-│   │   ├── index.faiss
-│   │   └── index.pkl
-│   └── query_classifier.joblib # Trained intent classifier
-│
-└── documentation/
-    ├── Project_Proposal.pdf
-    └── Project_Report.pdf
+└── Data/
+    ├── cleaned_symptoms.csv    # Medical text dataset
+    ├── classifier_dataset.csv  # Intent classifier training data
+    └── faiss_symptom_index/    # FAISS vector index
+        ├── index.faiss
+        └── index.pkl
 ```
 
 ---
@@ -227,12 +222,13 @@ medical-chatbot-krr/
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
 | **Language** | Python 3.9+ | Core programming |
-| **UI Framework** | Streamlit | Web interface |
+| **Backend API** | FastAPI + Uvicorn | REST API serving the reasoning pipeline |
+| **Frontend** | HTML / CSS / JavaScript | Chat interface with live reasoning visualization |
 | **LLM** | Google Gemini 2.5 Flash | Natural language generation |
 | **RAG Framework** | LangChain | Orchestration & prompting |
 | **Vector DB** | FAISS | Semantic search |
-| **Embeddings** | HuggingFace (all-MiniLM-L6-v2) | Text vectorization |
-| **ML** | Scikit-learn | Intent classification |
+| **Embeddings** | HuggingFace (`all-MiniLM-L6-v2`) | Text vectorization |
+| **ML** | Scikit-learn (TF-IDF + Logistic Regression) | Intent classification |
 | **Data Processing** | Pandas, NumPy | Data manipulation |
 
 ---
@@ -243,30 +239,30 @@ medical-chatbot-krr/
 ```python
 "dengue_fever": {
     "name": "Dengue Fever",
-    "symptoms": ["high_fever", "severe_headache", "pain_behind_eyes", 
+    "symptoms": ["high_fever", "severe_headache", "pain_behind_eyes",
                  "joint_pain", "skin_rash"],
     "severity": "moderate_to_severe",
     "requires_immediate_care": True,
     "treatments": ["rest", "hydration", "pain_relievers"]
 }
 ```
+The ontology currently defines **4 diseases** (Dengue Fever, Malaria, Common Cold, Migraine) with their symptoms, severity, causes, treatments, complications, and diagnosis methods — structured as a Python knowledge base rather than free text.
 
 ### 2. Reasoning Rules
 ```python
-IF high_fever AND severe_headache 
+IF high_fever AND severe_headache
    AND (skin_rash OR pain_behind_eyes OR joint_pain)
 THEN dengue_fever (confidence: 0.80)
 ```
+Symptom-to-disease matching produces a base confidence score (matched symptoms ÷ total symptoms for that disease); explicit rules can then boost or add to that score.
 
 ### 3. RAG Pipeline
-- User query → Embed query → Search FAISS → Retrieve top 8 documents
-- Enhanced with inferred diseases for better retrieval
+- User query → embed query (`all-MiniLM-L6-v2`) → search FAISS index → retrieve top-k chunks
+- Retrieval is re-ranked using the diseases the KRR layer inferred, so results align with the reasoning rather than raw semantic similarity alone
+- The KRR's structured findings are prepended to the retrieved documents before being handed to the LLM — the model answers with reasoning as grounding, not just retrieved text
 
 ### 4. Explainable Output
-- Shows extracted symptoms
-- Displays disease candidates with confidence scores
-- Visualizes matched symptoms
-- Provides reasoning summary
+- Extracted symptoms, disease candidates with confidence scores, matched symptoms, and urgency flags are all surfaced live in the frontend — not hidden, not post-hoc
 
 ---
 
@@ -275,36 +271,23 @@ THEN dengue_fever (confidence: 0.80)
 - **[Student 1 Name]** - [Roll Number] - Ontology Design & Reasoning Engine
 - **[Student 2 Name]** - [Roll Number] - RAG Implementation & Vector Store
 - **[Student 3 Name]** - [Roll Number] - LLM Integration & Prompting
-- **[Student 4 Name]** - [Roll Number] - UI Development & Testing
+- **[Student 4 Name]** - [Roll Number] - Backend & Frontend Development
 
-**Supervisor:** [Professor Name]  
-**Course:** Knowledge Representation & Reasoning  
-**Institution:** [University Name]  
-**Semester:** Fall 2024
-
----
-
-## 📊 Performance Metrics
-
-- **Response Time:** 2-3 seconds average
-- **Retrieval Accuracy:** 85% relevant documents in top 5
-- **Disease Coverage:** 10+ diseases with formal definitions
-- **Symptom Recognition:** 20+ symptoms extracted
-- **Context Retention:** Up to 10 conversation turns
-- **Explainability:** 100% responses include reasoning breakdown
+**Supervisor:** [Professor Name]
+**Course:** Knowledge Representation & Reasoning
+**Institution:** Air University, Islamabad
+**Semester:** [Fill in]
 
 ---
 
 ## 🔮 Future Enhancements
 
-- [ ] Expand ontology to 100+ diseases
+- [ ] Expand ontology beyond the current 4 diseases
 - [ ] Multi-language support (Urdu, Arabic, etc.)
 - [ ] Temporal reasoning for symptom progression tracking
-- [ ] Integration with wearable devices
-- [ ] Mobile app development
+- [ ] Bayesian or ML-based confidence scoring instead of simple ratio matching
 - [ ] Voice input/output
-- [ ] Image analysis for visible symptoms
-- [ ] OWL ontology for formal reasoning
+- [ ] Migrate ontology to a formal standard (OWL / SNOMED-CT) for large-scale reasoning
 
 ---
 
@@ -328,7 +311,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## ⚠️ Disclaimer
 
-**IMPORTANT:** This chatbot is for educational and informational purposes only. It is NOT a substitute for professional medical advice, diagnosis, or treatment. 
+**IMPORTANT:** This chatbot is for educational and informational purposes only. It is NOT a substitute for professional medical advice, diagnosis, or treatment.
 
 - Always seek the advice of your physician or qualified health provider
 - Never disregard professional medical advice because of something you read here
@@ -337,25 +320,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📧 Contact
+**Made by Abdul Moeez**
 
-For questions or feedback:
-- **Email:** [your.email@example.com]
-- **LinkedIn:** [Your LinkedIn Profile]
-- **GitHub Issues:** [Report issues here](https://github.com/yourusername/medical-chatbot-krr/issues)
-
----
-
-## 🙏 Acknowledgments
-
-- Medical knowledge sources: [List your sources]
-- LangChain framework documentation
-- Google Gemini API
-- Streamlit community
-- Our course instructor and teaching assistants
-
----
-
-**Made with ❤️ by [Your Team Name]**
-
-*Last Updated: [Current Date]*
+*Last Updated: July 2026*
